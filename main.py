@@ -165,18 +165,13 @@ def run_analysis(video_path, video_name):
     status.success(f"✅ Fertig! {len(results)} Szenen analysiert.")
     return results
 
-# Sidebar
-with st.sidebar:
-    st.header("⚙️ Einstellungen")
-    api_key = st.text_input("Google Gemini API Key", type="password")
-    if not api_key:
-        try:
-            api_key = st.secrets["GOOGLE_API_KEY"]
-            st.success("✅ API Key geladen!")
-        except:
-            pass
-    if api_key:
-        genai.configure(api_key=api_key)
+# Load API Key from secrets (hidden from users)
+try:
+    api_key = st.secrets["GOOGLE_API_KEY"]
+    genai.configure(api_key=api_key)
+except:
+    api_key = None
+
 
 # Header
 st.title("🎬 AI Video Tagging Pipeline")
