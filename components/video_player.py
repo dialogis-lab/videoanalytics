@@ -10,20 +10,18 @@ import json
 from pathlib import Path
 
 
-def create_synced_video_player(video_path: str, scenes: list, height: int = 600):
+def create_synced_video_player(video_data: bytes, scenes: list, height: int = 600):
     """
     Creates a custom HTML5 video player with synchronized scene cards.
     
     Args:
-        video_path: Path to the video file
+        video_data: Raw bytes of the video file
         scenes: List of scene dicts with 'Scene_ID', 'Start_Time_s', 'End_Time_s', 'Description', 'Tags', 'Mood'
         height: Height of the component in pixels
     """
     
-    # Read video and encode as base64 for embedding
-    with open(video_path, 'rb') as f:
-        video_bytes = f.read()
-    video_b64 = base64.b64encode(video_bytes).decode()
+    # Encode as base64 for embedding
+    video_b64 = base64.b64encode(video_data).decode()
     
     # Convert scenes to JSON for JavaScript
     scenes_json = json.dumps(scenes, ensure_ascii=False)

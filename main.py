@@ -206,20 +206,11 @@ with tab2:
         # Show results with video player
         st.success(f"✅ {len(st.session_state.results)} Szenen analysiert!")
         
-        # Layout: Video left (smaller), Results right
-        video_col, results_col = st.columns([1, 2])
-        
-        with video_col:
-            if st.session_state.video_bytes:
-                st.video(st.session_state.video_bytes)
-        
-        with results_col:
-            st.markdown("### 🎬 Erkannte Szenen")
-            for result in st.session_state.results:
-                st.markdown(render_scene_card(result), unsafe_allow_html=True)
+        # Use custom synced player
+        create_synced_video_player(st.session_state.video_bytes, st.session_state.results)
             
-            with st.expander("📋 Tabellen-Ansicht anzeigen"):
-                st.dataframe(pd.DataFrame(st.session_state.results), use_container_width=True)
+        with st.expander("📋 Tabellen-Ansicht anzeigen"):
+            st.dataframe(pd.DataFrame(st.session_state.results), use_container_width=True)
         
         # Download + New Analysis
         col1, col2 = st.columns(2)
