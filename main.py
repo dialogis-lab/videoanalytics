@@ -202,13 +202,16 @@ with tab2:
         # Show results with video player
         st.success(f"✅ {len(st.session_state.results)} Szenen analysiert!")
         
-        # Show video if we have the bytes stored
-        if st.session_state.video_bytes:
-            st.video(st.session_state.video_bytes)
+        # Layout: Video left (smaller), Results right
+        video_col, results_col = st.columns([1, 2])
         
-        # Show results as nice cards
-        st.markdown("### 📋 Szenen-Übersicht")
-        st.dataframe(pd.DataFrame(st.session_state.results), use_container_width=True)
+        with video_col:
+            if st.session_state.video_bytes:
+                st.video(st.session_state.video_bytes)
+        
+        with results_col:
+            st.markdown("### 📋 Szenen-Übersicht")
+            st.dataframe(pd.DataFrame(st.session_state.results), use_container_width=True)
         
         # Download + New Analysis
         col1, col2 = st.columns(2)
