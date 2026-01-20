@@ -179,8 +179,8 @@ st.title("🎬 AI Video Tagging Pipeline")
 # Simple state
 if 'results' not in st.session_state:
     st.session_state.results = None
-if 'video_path' not in st.session_state:
-    st.session_state.video_path = None
+if 'video_bytes' not in st.session_state:
+    st.session_state.video_bytes = None
 
 # Tabs
 tab1, tab2 = st.tabs(["📊 Dashboard", "➕ Neue Analyse"])
@@ -199,14 +199,16 @@ with tab2:
     if not api_key:
         st.warning("⚠️ API Key eingeben!")
     elif st.session_state.results:
-        # Show results with synced video player
+        # Show results with video player
         st.success(f"✅ {len(st.session_state.results)} Szenen analysiert!")
         
-        # Show synced video player if video still exists
-        if st.session_state.video_path and os.path.exists(st.session_state.video_path):
-            create_synced_video_player(st.session_state.video_path, st.session_state.results, height=500)
-        else:
-            st.dataframe(pd.DataFrame(st.session_state.results))
+        # Show video if we have the bytes stored
+        if st.session_state.video_bytes:
+            st.video(st.session_state.video_bytes)
+        
+        # Show results as nice cards
+        st.markdown("### 📋 Szenen-Übersicht")
+        st.dataframe(pd.DataFrame(st.session_state.results), use_container_width=True)
         
         # Download + New Analysis
         col1, col2 = st.columns(2)
@@ -219,7 +221,7 @@ with tab2:
         with col2:
             if st.button("🔄 Neue Analyse", use_container_width=True):
                 st.session_state.results = None
-                st.session_state.video_path = None
+                st.session_state.video_bytes = None
                 st.rerun()
     else:
         # Show uploader
@@ -227,9 +229,12 @@ with tab2:
         uploaded = st.file_uploader("Video wählen", type=["mp4", "mov", "avi"])
         
         if uploaded:
-            # Save file
+            # Read video bytes for later playback
+            video_bytes = uploaded.read()
+            
+            # Save to temp file for analysis
             tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
-            tfile.write(uploaded.read())
+            tfile.write(video_bytes)
             tfile.close()
             video_path = tfile.name
             
@@ -237,14 +242,14 @@ with tab2:
             col1, col2 = st.columns([1, 1])
             
             with col1:
-                st.video(video_path)
+                st.video(video_bytes)
             
             with col2:
                 st.success(f"✅ **{uploaded.name}** bereit")
                 
                 if st.button("🚀 Analyse starten", type="primary", use_container_width=True):
-                    # Save video path to session state so we can show it later
-                    st.session_state.video_path = video_path
+                    # Save video bytes to session state for later playback
+                    st.session_state.video_bytes = video_bytes
                     results = run_analysis(video_path, uploaded.name)
                     
                     if results:
