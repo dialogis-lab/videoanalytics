@@ -104,6 +104,17 @@ def analyze_frame(frame):
     except Exception as e:
         return {"error": str(e)}
 
+def render_scene_card(result):
+    """Generates HTML for a single scene card."""
+    return f"""
+    <div style="border:1px solid #333; border-radius:8px; padding:10px; margin-bottom:8px; background:#1a1a1a;">
+        <span style="color:#888; font-size:0.85em;">Szene {result['Scene_ID']} • {result['Start_Time_s']}s - {result['End_Time_s']}s</span>
+        <div style="margin-top:6px; font-weight:500;">{result['Description']}</div>
+        <div style="margin-top:4px; color:#aaa; font-size:0.9em;">🏷️ {result['Tags']}</div>
+        <div style="color:#888; font-size:0.85em;">😊 {result['Mood']}</div>
+    </div>
+    """
+
 def run_analysis(video_path, video_name):
     """Run the analysis and return results with live preview"""
     progress = st.progress(0)
@@ -149,14 +160,7 @@ def run_analysis(video_path, video_name):
                 
                 # Live display: Show card immediately
                 with scene_container:
-                    st.markdown(f"""
-                    <div style="border:1px solid #333; border-radius:8px; padding:10px; margin-bottom:8px; background:#1a1a1a;">
-                        <span style="color:#888; font-size:0.85em;">Szene {result['Scene_ID']} • {result['Start_Time_s']}s - {result['End_Time_s']}s</span>
-                        <div style="margin-top:6px; font-weight:500;">{result['Description']}</div>
-                        <div style="margin-top:4px; color:#aaa; font-size:0.9em;">🏷️ {result['Tags']}</div>
-                        <div style="color:#888; font-size:0.85em;">😊 {result['Mood']}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    st.markdown(render_scene_card(result), unsafe_allow_html=True)
         
         import time
         time.sleep(0.5)
@@ -174,7 +178,7 @@ except:
 
 
 # Header
-st.title("🎬 AI Video Tagging Pipeline")
+st.title("🎬 AI Video Tagging Pipeline v2")
 
 # Simple state
 if 'results' not in st.session_state:
@@ -210,8 +214,12 @@ with tab2:
                 st.video(st.session_state.video_bytes)
         
         with results_col:
-            st.markdown("### 📋 Szenen-Übersicht")
-            st.dataframe(pd.DataFrame(st.session_state.results), use_container_width=True)
+            st.markdown("### 🎬 Erkannte Szenen")
+            for result in st.session_state.results:
+                st.markdown(render_scene_card(result), unsafe_allow_html=True)
+            
+            with st.expander("📋 Tabellen-Ansicht anzeigen"):
+                st.dataframe(pd.DataFrame(st.session_state.results), use_container_width=True)
         
         # Download + New Analysis
         col1, col2 = st.columns(2)
