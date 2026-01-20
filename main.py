@@ -14,6 +14,46 @@ from components.video_player import create_synced_video_player
 # Config
 st.set_page_config(page_title="Binumi AI Video Tagger", layout="wide")
 
+# Password Protection
+def check_password():
+    """Returns True if the user has the correct password."""
+    
+    def password_entered():
+        """Checks whether password entered by user is correct."""
+        try:
+            correct_email = st.secrets["AUTH_EMAIL"]
+            correct_password = st.secrets["AUTH_PASSWORD"]
+        except:
+            # If no secrets configured, skip auth
+            st.session_state["password_correct"] = True
+            return
+        
+        if (st.session_state["email"] == correct_email and 
+            st.session_state["password"] == correct_password):
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # Don't store password
+            del st.session_state["email"]
+        else:
+            st.session_state["password_correct"] = False
+
+    if st.session_state.get("password_correct", False):
+        return True
+
+    # Show login form
+    st.markdown("## 🔐 Login erforderlich")
+    st.text_input("Email", key="email")
+    st.text_input("Passwort", type="password", key="password")
+    st.button("Anmelden", on_click=password_entered)
+    
+    if "password_correct" in st.session_state and not st.session_state["password_correct"]:
+        st.error("❌ Email oder Passwort falsch!")
+    
+    return False
+
+# Check password first
+if not check_password():
+    st.stop()
+
 # History file
 HISTORY_FILE = Path("analysis_history.json")
 
