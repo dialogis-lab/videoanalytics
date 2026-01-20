@@ -12,7 +12,7 @@ from PIL import Image
 from components.video_player import create_synced_video_player
 
 # Config
-st.set_page_config(page_title="Binumi AI Video Tagger", layout="wide")
+st.set_page_config(page_title="AI Video Tagger", layout="wide")
 
 # Password Protection
 def check_password():
